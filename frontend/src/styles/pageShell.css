@@ -1,0 +1,52 @@
+.page-shell {
+  width: min(100%, 480px);
+  margin: 0 auto;
+  padding: 1.5rem 1rem 2rem;
+}
+
+.page-back-link__wrap {
+  margin-bottom: 1rem;
+}
+
+.page-back-link {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.page-back-link:hover {
+  text-decoration: underline;
+}
+
+.page-back-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.page-title {
+  margin: 0 0 1.25rem;
+  color: var(--text-h);
+  font-size: 1.5rem;
+}
+
+.page-status {
+  margin: 2rem 0 0;
+  color: var(--text);
+  text-align: center;
+}
+
+.page-status--error {
+  color: #dc2626;
+}
+
+.page-status--success {
+  margin: 0 0 1rem;
+  color: var(--text-h);
+  text-align: center;
+}
+
+@media (prefers-color-scheme: dark) {
+  .page-status--error {
+    color: #f87171;
+  }
+}

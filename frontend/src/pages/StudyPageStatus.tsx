@@ -1,3 +1,5 @@
+import '../styles/pageShell.css'
+
 type StudyPageStatusProps = {
   message: string
   variant?: 'default' | 'error'
@@ -8,9 +10,7 @@ export function StudyPageStatus({
   variant = 'default',
 }: StudyPageStatusProps) {
   const className =
-    variant === 'error'
-      ? 'study-page__status study-page__status--error'
-      : 'study-page__status'
+    variant === 'error' ? 'page-status page-status--error' : 'page-status'
 
   return (
     <p className={className} role={variant === 'error' ? 'alert' : undefined}>

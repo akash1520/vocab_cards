@@ -1,7 +1,7 @@
 import { useStudySession } from '../hooks/useStudySession'
+import '../styles/pageShell.css'
 import { StudyPageStatus } from './StudyPageStatus'
 import { StudySessionView } from './StudySessionView'
-import './StudyPage.css'
 
 export function StudyPage() {
   const {
@@ -20,7 +20,7 @@ export function StudyPage() {
   const showSession = !isLoading && !error && currentWord
 
   return (
-    <main className="study-page">
+    <main className="page-shell study-page">
       {isLoading ? (
         <StudyPageStatus message="Loading study queue..." />
       ) : null}
