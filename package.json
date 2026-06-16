@@ -4,7 +4,9 @@
   "scripts": {
     "dev": "concurrently -n frontend,backend -c blue,green \"npm run dev:frontend\" \"npm run dev:backend\"",
     "dev:frontend": "npm run dev --prefix frontend",
-    "dev:backend": "cd backend && .venv/bin/uvicorn app.main:app --reload --port 8000"
+    "dev:backend": "cd backend && .venv/bin/uvicorn app.main:app --reload --port 8000",
+    "dev:db": "docker compose up -d postgres",
+    "db:migrate": "cd backend && .venv/bin/alembic upgrade head"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

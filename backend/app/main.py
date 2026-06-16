@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.database import init_db
+from app.db.session import init_db
 from app.routers import words
 
 app = FastAPI(title="Vocab Cards API")

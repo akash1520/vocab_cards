@@ -4,8 +4,11 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from app.database import Base, get_db
+from app.db.base import Base
 from app.main import app
+from app.models import word  # noqa: F401
+from app.repositories.dependencies import get_word_repository
+from app.repositories.sqlalchemy_word_repository import SqlAlchemyWordRepository
 
 
 @pytest.fixture()
@@ -27,13 +30,10 @@ def db_session() -> Session:
 
 @pytest.fixture()
 def client(db_session: Session) -> TestClient:
-    def override_get_db():
-        try:
-            yield db_session
-        finally:
-            pass
+    def override_get_word_repository() -> SqlAlchemyWordRepository:
+        return SqlAlchemyWordRepository(db_session)
 
-    app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[get_word_repository] = override_get_word_repository
     with TestClient(app) as test_client:
         yield test_client
     app.dependency_overrides.clear()

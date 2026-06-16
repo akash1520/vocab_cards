@@ -6,6 +6,7 @@ A vocabulary flashcard app with spaced repetition. React frontend + FastAPI back
 
 - Node.js 18+
 - Python 3.11+
+- Docker (for local PostgreSQL)
 
 ## One-time setup
 
@@ -18,7 +19,6 @@ cd ../backend
 python -m venv .venv
 .venv/bin/pip install -e ".[dev]"
 
-# Optional: copy env file (defaults work for local SQLite)
 cp .env.example .env
 ```
 
@@ -27,6 +27,15 @@ From the repo root, install the dev orchestration dependency:
 ```bash
 npm install
 ```
+
+Start PostgreSQL and apply migrations:
+
+```bash
+npm run dev:db
+npm run db:migrate
+```
+
+PostgreSQL runs on host port **5433** (mapped from container 5432) to avoid conflicting with a local Postgres on 5432.
 
 ## Run (development)
 
@@ -38,16 +47,19 @@ npm run dev
 
 This starts both servers:
 
-| Service  | URL                      |
-|----------|--------------------------|
-| Frontend | http://localhost:5173    |
-| Backend  | http://localhost:8000    |
+| Service    | URL                      |
+|------------|--------------------------|
+| Frontend   | http://localhost:5173    |
+| Backend    | http://localhost:8000    |
+| PostgreSQL | localhost:5433           |
 
 The Vite dev server proxies `/api` requests to the backend on port 8000.
 
 ### Run individually
 
 ```bash
+npm run dev:db         # PostgreSQL only (Docker)
+npm run db:migrate     # Apply Alembic migrations
 npm run dev:frontend   # Vite only
 npm run dev:backend    # FastAPI only
 ```
@@ -65,6 +77,8 @@ npm run dev:backend    # FastAPI only
 cd frontend && npm run test:run
 cd backend && .venv/bin/pytest
 ```
+
+Backend tests use an in-memory SQLite database through the same `SqlAlchemyWordRepository` implementation.
 
 ## Local LLM (Ollama)
 
@@ -85,6 +99,7 @@ ollama serve
 Copy and edit `backend/.env` (see [backend/.env.example](backend/.env.example)):
 
 ```
+DATABASE_URL=postgresql+psycopg://vocab:vocab@localhost:5433/vocab_cards
 OLLAMA_BASE_URL=http://localhost:11434
 OLLAMA_MODEL=llama3
 ```

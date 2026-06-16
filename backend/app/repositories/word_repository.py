@@ -1,0 +1,16 @@
+from typing import Protocol
+
+from app.schemas.word import CreateWordInput, Word
+from app.services.srs import SrsUpdate
+
+
+class WordRepository(Protocol):
+    def list_all(self) -> list[Word]: ...
+
+    def find_by_id(self, word_id: str) -> Word | None: ...
+
+    def find_by_term_case_insensitive(self, term: str) -> Word | None: ...
+
+    def create(self, payload: CreateWordInput) -> Word: ...
+
+    def apply_srs_update(self, word_id: str, update: SrsUpdate) -> Word | None: ...
