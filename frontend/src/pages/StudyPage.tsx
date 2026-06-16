@@ -1,7 +1,7 @@
-import { Link } from 'react-router-dom'
-import { FlashCard } from '../components/FlashCard/FlashCard'
-import { StudyControls } from '../components/StudyControls/StudyControls'
 import { useStudySession } from '../hooks/useStudySession'
+import { StudyPageHeader } from './StudyPageHeader'
+import { StudyPageStatus } from './StudyPageStatus'
+import { StudySessionView } from './StudySessionView'
 import './StudyPage.css'
 
 export function StudyPage() {
@@ -18,37 +18,34 @@ export function StudyPage() {
     markLearning,
   } = useStudySession()
 
+  const showSession = !isLoading && !error && currentWord
+
   return (
     <main className="study-page">
-      <div className="study-page__header">
-        <Link className="study-page__link" to="/add-words">
-          Add words
-        </Link>
-      </div>
+      <StudyPageHeader />
 
-      {isLoading ? <p className="study-page__status">Loading study queue...</p> : null}
-
-      {!isLoading && error ? (
-        <p className="study-page__status study-page__status--error" role="alert">
-          {error}
-        </p>
+      {isLoading ? (
+        <StudyPageStatus message="Loading study queue..." />
       ) : null}
 
-      {!isLoading && !error && currentWord ? (
-        <>
-          <FlashCard word={currentWord} onFlipChange={setIsFlipped} />
-          <StudyControls
-            isFlipped={isFlipped}
-            currentIndex={currentIndex}
-            total={total}
-            onKnow={() => void markKnown()}
-            onLearning={() => void markLearning()}
-          />
-        </>
+      {!isLoading && error ? (
+        <StudyPageStatus message={error} variant="error" />
+      ) : null}
+
+      {showSession ? (
+        <StudySessionView
+          word={currentWord}
+          isFlipped={isFlipped}
+          currentIndex={currentIndex}
+          total={total}
+          onFlipChange={setIsFlipped}
+          onKnow={() => void markKnown()}
+          onLearning={() => void markLearning()}
+        />
       ) : null}
 
       {!isLoading && !error && !currentWord ? (
-        <p className="study-page__status">{emptyMessage}</p>
+        <StudyPageStatus message={emptyMessage} />
       ) : null}
     </main>
   )
