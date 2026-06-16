@@ -72,26 +72,14 @@ export function useStudySession(): StudySession {
       return
     }
 
-    // #region agent log
-    fetch('http://127.0.0.1:7930/ingest/783e0d73-e43a-4bf7-ab22-f70f31055d00',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'c28540'},body:JSON.stringify({sessionId:'c28540',location:'useStudySession.ts:markKnown:before',message:'markKnown before',data:{wordId:currentWord.id,term:currentWord.term,queueIndex,queueLength:words.length,queueTerms:words.map((w)=>w.term)},timestamp:Date.now(),hypothesisId:'A'})}).catch(()=>{});
-    // #endregion
-
     await reviewWord(currentWord, true)
     removeCurrentFromQueue()
-
-    // #region agent log
-    fetch('http://127.0.0.1:7930/ingest/783e0d73-e43a-4bf7-ab22-f70f31055d00',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'c28540'},body:JSON.stringify({sessionId:'c28540',location:'useStudySession.ts:markKnown:after',message:'markKnown after remove',data:{wordId:currentWord.id,queueIndex},timestamp:Date.now(),hypothesisId:'A'})}).catch(()=>{});
-    // #endregion
-  }, [currentWord, queueIndex, removeCurrentFromQueue, words])
+  }, [currentWord, removeCurrentFromQueue])
 
   const markLearning = useCallback(async () => {
     if (!currentWord) {
       return
     }
-
-    // #region agent log
-    fetch('http://127.0.0.1:7930/ingest/783e0d73-e43a-4bf7-ab22-f70f31055d00',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'c28540'},body:JSON.stringify({sessionId:'c28540',location:'useStudySession.ts:markLearning:before',message:'markLearning before',data:{wordId:currentWord.id,term:currentWord.term,queueIndex,queueLength:words.length,queueTerms:words.map((w)=>w.term)},timestamp:Date.now(),hypothesisId:'B'})}).catch(()=>{});
-    // #endregion
 
     await reviewWord(currentWord, false)
 
@@ -100,11 +88,7 @@ export function useStudySession(): StudySession {
     } else {
       removeCurrentFromQueue()
     }
-
-    // #region agent log
-    fetch('http://127.0.0.1:7930/ingest/783e0d73-e43a-4bf7-ab22-f70f31055d00',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'c28540'},body:JSON.stringify({sessionId:'c28540',location:'useStudySession.ts:markLearning:after',message:'markLearning after rotate/remove',data:{wordId:currentWord.id,queueIndex,requeued:words.length<REQUEUE_STACK_THRESHOLD},timestamp:Date.now(),hypothesisId:'B'})}).catch(()=>{});
-    // #endregion
-  }, [currentWord, queueIndex, removeCurrentFromQueue, rotateCurrentToBack, words])
+  }, [currentWord, removeCurrentFromQueue, rotateCurrentToBack, words.length])
 
   return {
     currentWord,

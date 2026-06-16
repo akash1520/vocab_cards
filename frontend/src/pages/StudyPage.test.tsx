@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest'
 import type { Word } from '../api/types'
 import { Layout } from '../components/Layout/Layout'
 import { sampleWord } from '../test/fixtures'
+import { sampleUser } from '../test/authFixtures'
 import { renderWithRouter } from '../test/renderWithRouter'
 import { server } from '../test/mswServer'
 import { StudyPage } from './StudyPage'
@@ -21,7 +22,12 @@ const secondWord: Word = {
 }
 
 describe('StudyPage', () => {
+  function mockStudySession() {
+    server.use(http.get('/api/auth/me', () => HttpResponse.json(sampleUser)))
+  }
+
   it('renders FlashCard and StudyControls wired through the study session', async () => {
+    mockStudySession()
     server.use(
       http.get('/api/words/due', () => HttpResponse.json([sampleWord, secondWord])),
     )
@@ -30,6 +36,7 @@ describe('StudyPage', () => {
       <Layout>
         <StudyPage />
       </Layout>,
+      { authToken: 'token-1' },
     )
 
     await waitFor(() => {
@@ -44,6 +51,7 @@ describe('StudyPage', () => {
   it('enables study controls after the flashcard is flipped', async () => {
     const user = userEvent.setup()
 
+    mockStudySession()
     server.use(
       http.get('/api/words/due', () => HttpResponse.json([sampleWord, secondWord])),
     )
@@ -52,6 +60,7 @@ describe('StudyPage', () => {
       <Layout>
         <StudyPage />
       </Layout>,
+      { authToken: 'token-1' },
     )
 
     await waitFor(() => {
@@ -65,12 +74,14 @@ describe('StudyPage', () => {
   })
 
   it('shows a link to add words', async () => {
+    mockStudySession()
     server.use(http.get('/api/words/due', () => HttpResponse.json([])))
 
     renderWithRouter(
       <Layout>
         <StudyPage />
       </Layout>,
+      { authToken: 'token-1' },
     )
 
     await waitFor(() => {

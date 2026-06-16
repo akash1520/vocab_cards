@@ -32,7 +32,16 @@
   color: var(--accent);
 }
 
-.layout__link:focus-visible {
+.layout__logout {
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+.layout__link:focus-visible,
+.layout__logout:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }

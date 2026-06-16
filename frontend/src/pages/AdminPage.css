@@ -1,0 +1,25 @@
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 0.65rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.admin-table th {
+  color: var(--text-h);
+  font-weight: 600;
+}
+
+.admin-table td {
+  color: var(--text);
+}
+
+.admin-table__role {
+  text-transform: capitalize;
+}

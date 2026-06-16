@@ -1,12 +1,17 @@
 import { NavLink } from 'react-router-dom'
-import { APP_BRAND, APP_NAV_ITEMS } from './navigation'
+import { useAuth } from '../../auth/useAuth'
+import { APP_BRAND, getAppNavItems } from './navigation'
+import './Layout.css'
 
 export function LayoutNav() {
+  const { user, logout } = useAuth()
+  const navItems = getAppNavItems(user)
+
   return (
     <nav className="layout__nav" aria-label="Main navigation">
       <span className="layout__brand">{APP_BRAND}</span>
       <div className="layout__links">
-        {APP_NAV_ITEMS.map((item) => (
+        {navItems.map((item) => (
           <NavLink
             key={item.to}
             className="layout__link"
@@ -16,6 +21,11 @@ export function LayoutNav() {
             {item.label}
           </NavLink>
         ))}
+        {user ? (
+          <button className="layout__link layout__logout" type="button" onClick={logout}>
+            Logout
+          </button>
+        ) : null}
       </div>
     </nav>
   )

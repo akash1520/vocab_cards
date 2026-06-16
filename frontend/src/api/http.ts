@@ -1,3 +1,9 @@
+import {
+  clearToken,
+  getToken,
+  notifyUnauthorized,
+} from '../auth/tokenStorage'
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? ''
 
 export const JSON_HEADERS = {
@@ -26,13 +32,38 @@ export async function parseResponse<T>(response: Response): Promise<T> {
   throw new Error(message)
 }
 
+function buildHeaders(headers?: HeadersInit): Headers {
+  const next = new Headers(headers)
+  const token = getToken()
+
+  if (token) {
+    next.set('Authorization', `Bearer ${token}`)
+  }
+
+  return next
+}
+
+async function request(path: string, init?: RequestInit): Promise<Response> {
+  const response = await fetch(apiUrl(path), {
+    ...init,
+    headers: buildHeaders(init?.headers),
+  })
+
+  if (response.status === 401) {
+    clearToken()
+    notifyUnauthorized()
+  }
+
+  return response
+}
+
 export async function apiGet<T>(path: string): Promise<T> {
-  const response = await fetch(apiUrl(path))
+  const response = await request(path)
   return parseResponse<T>(response)
 }
 
 export async function apiPost<T>(path: string, body: unknown): Promise<T> {
-  const response = await fetch(apiUrl(path), {
+  const response = await request(path, {
     method: 'POST',
     headers: JSON_HEADERS,
     body: JSON.stringify(body),

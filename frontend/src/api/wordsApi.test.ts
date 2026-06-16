@@ -1,26 +1,39 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { setToken, clearToken } from '../auth/tokenStorage'
 import { createWord, enrichWord, getDueWords, submitReview } from './wordsApi'
 import type { Word } from './types'
 import { sampleWord } from '../test/fixtures'
 
 describe('wordsApi', () => {
   beforeEach(() => {
+    setToken('test-token')
     vi.stubGlobal('fetch', vi.fn())
   })
 
   afterEach(() => {
+    clearToken()
     vi.unstubAllGlobals()
   })
 
   describe('getDueWords', () => {
     it('calls GET /api/words/due?limit=20 and returns typed words', async () => {
+      setToken('test-token')
+
       vi.mocked(fetch).mockResolvedValueOnce(
         new Response(JSON.stringify([sampleWord]), { status: 200 }),
       )
 
       const words = await getDueWords()
 
-      expect(fetch).toHaveBeenCalledWith('/api/words/due?limit=20')
+      expect(fetch).toHaveBeenCalledWith(
+        '/api/words/due?limit=20',
+        expect.objectContaining({
+          headers: expect.any(Headers),
+        }),
+      )
+      expect(
+        new Headers(vi.mocked(fetch).mock.calls[0]?.[1]?.headers).get('Authorization'),
+      ).toBe('Bearer test-token')
       expect(words).toEqual([sampleWord])
       expect(words[0]?.term).toBe('unnerve')
     })
@@ -53,11 +66,14 @@ describe('wordsApi', () => {
 
       const created = await createWord(input)
 
-      expect(fetch).toHaveBeenCalledWith('/api/words', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(input),
-      })
+      expect(fetch).toHaveBeenCalledWith(
+        '/api/words',
+        expect.objectContaining({
+          method: 'POST',
+          headers: expect.any(Headers),
+          body: JSON.stringify(input),
+        }),
+      )
       expect(created.term).toBe('ephemeral')
     })
 
@@ -95,11 +111,14 @@ describe('wordsApi', () => {
 
       const updated = await submitReview('word-1', { knew_it: true })
 
-      expect(fetch).toHaveBeenCalledWith('/api/words/word-1/review', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ knew_it: true }),
-      })
+      expect(fetch).toHaveBeenCalledWith(
+        '/api/words/word-1/review',
+        expect.objectContaining({
+          method: 'POST',
+          headers: expect.any(Headers),
+          body: JSON.stringify({ knew_it: true }),
+        }),
+      )
       expect(updated).toEqual(reviewedWord)
     })
   })
@@ -121,11 +140,14 @@ describe('wordsApi', () => {
 
       const result = await enrichWord('ephemeral')
 
-      expect(fetch).toHaveBeenCalledWith('/api/words/enrich', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ term: 'ephemeral' }),
-      })
+      expect(fetch).toHaveBeenCalledWith(
+        '/api/words/enrich',
+        expect.objectContaining({
+          method: 'POST',
+          headers: expect.any(Headers),
+          body: JSON.stringify({ term: 'ephemeral' }),
+        }),
+      )
       expect(result).toEqual(enrichResponse)
     })
 

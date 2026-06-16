@@ -4,20 +4,32 @@ import {
   MemoryRouter,
   type MemoryRouterProps,
 } from 'react-router-dom'
+import { AuthProvider } from '../auth/AuthProvider'
+import { setToken } from '../auth/tokenStorage'
 
 type RenderWithRouterOptions = Omit<RenderOptions, 'wrapper'> & {
   route?: string
   routerProps?: Omit<MemoryRouterProps, 'initialEntries'>
+  authToken?: string | null
 }
 
 export function renderWithRouter(
   ui: ReactElement,
-  { route = '/', routerProps, ...renderOptions }: RenderWithRouterOptions = {},
+  {
+    route = '/',
+    routerProps,
+    authToken,
+    ...renderOptions
+  }: RenderWithRouterOptions = {},
 ) {
+  if (authToken) {
+    setToken(authToken)
+  }
+
   function Wrapper({ children }: { children: ReactNode }) {
     return (
       <MemoryRouter initialEntries={[route]} {...routerProps}>
-        {children}
+        <AuthProvider>{children}</AuthProvider>
       </MemoryRouter>
     )
   }
