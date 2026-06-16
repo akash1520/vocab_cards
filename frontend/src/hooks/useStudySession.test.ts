@@ -37,25 +37,18 @@ describe('useStudySession', () => {
     expect(result.current.error).toBeNull()
   })
 
-  it('markKnown calls review API and advances to the next card', async () => {
-    let reviewCalled = false
-
+  it('markKnown removes the card from the session queue without advancing past a gap', async () => {
     server.use(
       http.get('/api/words/due', () => HttpResponse.json([sampleWord, secondWord])),
-      http.post('/api/words/word-1/review', async ({ request }) => {
-        reviewCalled = true
-        const body = (await request.json()) as { knew_it: boolean }
-
-        expect(body).toEqual({ knew_it: true })
-
-        return HttpResponse.json({
+      http.post('/api/words/word-1/review', () =>
+        HttpResponse.json({
           ...sampleWord,
           status: 'learning',
           repetitions: 1,
           interval_days: 1,
           next_review_at: '2026-06-17T12:00:00.000Z',
-        })
-      }),
+        }),
+      ),
     )
 
     const { result } = renderHook(() => useStudySession())
@@ -68,9 +61,9 @@ describe('useStudySession', () => {
 
     await waitFor(() => {
       expect(result.current.currentWord).toEqual(secondWord)
+      expect(result.current.total).toBe(1)
+      expect(result.current.currentIndex).toBe(1)
     })
-    expect(reviewCalled).toBe(true)
-    expect(result.current.currentIndex).toBe(2)
   })
 
   it('markLearning calls review API with knew_it false and advances', async () => {
@@ -106,6 +99,117 @@ describe('useStudySession', () => {
       expect(result.current.currentWord).toEqual(secondWord)
     })
     expect(reviewCalled).toBe(true)
+    expect(result.current.total).toBe(2)
+    expect(result.current.currentIndex).toBe(1)
+  })
+
+  it('markLearning rotates the card to the back without duplicating it in the queue', async () => {
+    server.use(
+      http.get('/api/words/due', () => HttpResponse.json([sampleWord, secondWord])),
+      http.post('/api/words/word-1/review', () =>
+        HttpResponse.json({
+          ...sampleWord,
+          status: 'learning',
+          repetitions: 0,
+          interval_days: 0,
+          next_review_at: '2026-06-16T12:10:00.000Z',
+        }),
+      ),
+      http.post('/api/words/word-2/review', () =>
+        HttpResponse.json({
+          ...secondWord,
+          status: 'learning',
+          repetitions: 0,
+          interval_days: 0,
+          next_review_at: '2026-06-16T12:10:00.000Z',
+        }),
+      ),
+    )
+
+    const { result } = renderHook(() => useStudySession())
+
+    await waitFor(() => {
+      expect(result.current.currentWord).toEqual(sampleWord)
+    })
+
+    await result.current.markLearning()
+
+    await waitFor(() => {
+      expect(result.current.currentWord).toEqual(secondWord)
+      expect(result.current.total).toBe(2)
+      expect(result.current.currentIndex).toBe(1)
+    })
+
+    await result.current.markLearning()
+
+    await waitFor(() => {
+      expect(result.current.currentWord).toEqual(sampleWord)
+      expect(result.current.total).toBe(2)
+      expect(result.current.currentIndex).toBe(1)
+    })
+  })
+
+  it('markLearning re-queues the card at the end when the stack has fewer than 10 cards', async () => {
+    server.use(
+      http.get('/api/words/due', () => HttpResponse.json([sampleWord])),
+      http.post('/api/words/word-1/review', () =>
+        HttpResponse.json({
+          ...sampleWord,
+          status: 'learning',
+          repetitions: 0,
+          interval_days: 0,
+          next_review_at: '2026-06-16T12:10:00.000Z',
+        }),
+      ),
+    )
+
+    const { result } = renderHook(() => useStudySession())
+
+    await waitFor(() => {
+      expect(result.current.currentWord).toEqual(sampleWord)
+    })
+
+    await result.current.markLearning()
+
+    await waitFor(() => {
+      expect(result.current.currentWord).toEqual(sampleWord)
+      expect(result.current.total).toBe(1)
+      expect(result.current.currentIndex).toBe(1)
+    })
+  })
+
+  it('markLearning does not re-queue when the stack already has 10 cards', async () => {
+    const tenWords = Array.from({ length: 10 }, (_, index) => ({
+      ...sampleWord,
+      id: `word-${index + 1}`,
+      term: `term-${index + 1}`,
+    }))
+
+    server.use(
+      http.get('/api/words/due', () => HttpResponse.json(tenWords)),
+      http.post('/api/words/word-1/review', () =>
+        HttpResponse.json({
+          ...tenWords[0],
+          status: 'learning',
+          repetitions: 0,
+          interval_days: 0,
+          next_review_at: '2026-06-16T12:10:00.000Z',
+        }),
+      ),
+    )
+
+    const { result } = renderHook(() => useStudySession())
+
+    await waitFor(() => {
+      expect(result.current.currentWord).toEqual(tenWords[0])
+    })
+
+    await result.current.markLearning()
+
+    await waitFor(() => {
+      expect(result.current.currentWord).toEqual(tenWords[1])
+      expect(result.current.total).toBe(9)
+    })
   })
 
   it('shows an empty message when no words are due', async () => {
