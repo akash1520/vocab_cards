@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import type { CreateWordInput } from '../../api/types'
-import { parseSynonymsInput } from './parseSynonymsInput'
+import { buildCreateWordInput } from './buildCreateWordInput'
+import { WordFormField } from './WordFormField'
 import {
   emptyWordFormValues,
   validateWordForm,
@@ -50,19 +51,10 @@ export function WordForm({ onSubmit, submitError = null }: WordFormProps) {
       return
     }
 
-    const synonyms = parseSynonymsInput(values.synonyms)
-    const payload: CreateWordInput = {
-      term: values.term.trim(),
-      part_of_speech: values.part_of_speech.trim(),
-      definition: values.definition.trim(),
-      example_sentence: values.example_sentence.trim(),
-      synonyms,
-    }
-
     setIsSubmitting(true)
 
     try {
-      await onSubmit(payload)
+      await onSubmit(buildCreateWordInput(values))
       resetForm()
     } catch {
       // Keep entered values when submission fails.
@@ -73,72 +65,43 @@ export function WordForm({ onSubmit, submitError = null }: WordFormProps) {
 
   return (
     <form className="word-form" onSubmit={(event) => void handleSubmit(event)}>
-      <div className="word-form__field">
-        <label htmlFor="term">Term</label>
-        <input
-          id="term"
-          name="term"
-          value={values.term}
-          onChange={(event) => updateField('term', event.target.value)}
-        />
-        {fieldErrors.term ? (
-          <p className="word-form__error">{fieldErrors.term}</p>
-        ) : null}
-      </div>
-
-      <div className="word-form__field">
-        <label htmlFor="part_of_speech">Part of speech</label>
-        <input
-          id="part_of_speech"
-          name="part_of_speech"
-          value={values.part_of_speech}
-          onChange={(event) =>
-            updateField('part_of_speech', event.target.value)
-          }
-        />
-        {fieldErrors.part_of_speech ? (
-          <p className="word-form__error">{fieldErrors.part_of_speech}</p>
-        ) : null}
-      </div>
-
-      <div className="word-form__field">
-        <label htmlFor="definition">Definition</label>
-        <textarea
-          id="definition"
-          name="definition"
-          value={values.definition}
-          onChange={(event) => updateField('definition', event.target.value)}
-        />
-        {fieldErrors.definition ? (
-          <p className="word-form__error">{fieldErrors.definition}</p>
-        ) : null}
-      </div>
-
-      <div className="word-form__field">
-        <label htmlFor="synonyms">Synonyms</label>
-        <input
-          id="synonyms"
-          name="synonyms"
-          value={values.synonyms}
-          onChange={(event) => updateField('synonyms', event.target.value)}
-          placeholder="comma-separated"
-        />
-      </div>
-
-      <div className="word-form__field">
-        <label htmlFor="example_sentence">Example sentence</label>
-        <textarea
-          id="example_sentence"
-          name="example_sentence"
-          value={values.example_sentence}
-          onChange={(event) =>
-            updateField('example_sentence', event.target.value)
-          }
-        />
-        {fieldErrors.example_sentence ? (
-          <p className="word-form__error">{fieldErrors.example_sentence}</p>
-        ) : null}
-      </div>
+      <WordFormField
+        id="term"
+        label="Term"
+        value={values.term}
+        error={fieldErrors.term}
+        onChange={(value) => updateField('term', value)}
+      />
+      <WordFormField
+        id="part_of_speech"
+        label="Part of speech"
+        value={values.part_of_speech}
+        error={fieldErrors.part_of_speech}
+        onChange={(value) => updateField('part_of_speech', value)}
+      />
+      <WordFormField
+        id="definition"
+        label="Definition"
+        value={values.definition}
+        error={fieldErrors.definition}
+        onChange={(value) => updateField('definition', value)}
+        multiline
+      />
+      <WordFormField
+        id="synonyms"
+        label="Synonyms"
+        value={values.synonyms}
+        onChange={(value) => updateField('synonyms', value)}
+        placeholder="comma-separated"
+      />
+      <WordFormField
+        id="example_sentence"
+        label="Example sentence"
+        value={values.example_sentence}
+        error={fieldErrors.example_sentence}
+        onChange={(value) => updateField('example_sentence', value)}
+        multiline
+      />
 
       {submitError ? (
         <p className="word-form__error word-form__error--submit" role="alert">
