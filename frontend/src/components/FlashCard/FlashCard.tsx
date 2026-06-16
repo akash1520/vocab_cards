@@ -1,16 +1,23 @@
 import { useState } from 'react'
 import type { Word } from '../../api/types'
+import { FlashCardBack } from './FlashCardBack'
+import { FlashCardFront } from './FlashCardFront'
 import './FlashCard.css'
 
 type FlashCardProps = {
   word: Word
+  onFlipChange?: (isFlipped: boolean) => void
 }
 
-export function FlashCard({ word }: FlashCardProps) {
+export function FlashCard({ word, onFlipChange }: FlashCardProps) {
   const [isFlipped, setIsFlipped] = useState(false)
 
   function toggleFlip() {
-    setIsFlipped((flipped) => !flipped)
+    setIsFlipped((flipped) => {
+      const nextFlipped = !flipped
+      onFlipChange?.(nextFlipped)
+      return nextFlipped
+    })
   }
 
   return (
@@ -22,28 +29,15 @@ export function FlashCard({ word }: FlashCardProps) {
       onClick={toggleFlip}
     >
       <div className="flash-card__inner">
-        {!isFlipped ? (
-          <div className="flash-card__face flash-card__face--front">
-            <span className="flash-card__term">{word.term}</span>
-            <span className="flash-card__hint">tap to flip</span>
-          </div>
+        {isFlipped ? (
+          <FlashCardBack
+            part_of_speech={word.part_of_speech}
+            definition={word.definition}
+            synonyms={word.synonyms}
+            example_sentence={word.example_sentence}
+          />
         ) : (
-          <div className="flash-card__face flash-card__face--back">
-            <p className="flash-card__definition">
-              <span className="flash-card__part-of-speech">
-                {word.part_of_speech}:
-              </span>{' '}
-              {word.definition}
-            </p>
-            {word.synonyms.length > 0 ? (
-              <p className="flash-card__synonyms">
-                Synonyms: {word.synonyms.join(', ')}
-              </p>
-            ) : null}
-            <p className="flash-card__example">
-              <em>{word.example_sentence}</em>
-            </p>
-          </div>
+          <FlashCardFront term={word.term} />
         )}
       </div>
     </button>
