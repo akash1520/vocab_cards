@@ -10,6 +10,7 @@
   box-shadow: var(--shadow);
   color: var(--text-h);
   cursor: pointer;
+  font: inherit;
   perspective: 1000px;
   text-align: center;
 }
@@ -42,6 +43,8 @@
 .flash-card__face--back {
   transform: rotateY(180deg);
   text-align: left;
+  font-size: 1.125rem;
+  line-height: 1.5;
 }
 
 .flash-card__term {
@@ -62,6 +65,13 @@
   width: 100%;
 }
 
+.flash-card__definition {
+  color: var(--text-h);
+  font-size: 1.35rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
 .flash-card__part-of-speech {
   font-weight: 700;
   text-transform: lowercase;
@@ -69,8 +79,10 @@
 
 .flash-card__synonyms {
   color: var(--text);
+  font-size: 1.05rem;
 }
 
 .flash-card__example {
   color: var(--text);
+  font-size: 1.05rem;
 }
