@@ -1,9 +1,15 @@
 import { screen } from '@testing-library/react'
-import { describe, it, expect } from 'vitest'
+import { http, HttpResponse } from 'msw'
+import { beforeEach, describe, it, expect } from 'vitest'
 import App from './App'
 import { renderWithRouter } from './test/renderWithRouter'
+import { server } from './test/mswServer'
 
 describe('App smoke test', () => {
+  beforeEach(() => {
+    server.use(http.get('/api/words/due', () => HttpResponse.json([])))
+  })
+
   it('renders the vocab cards app shell with routed layout', () => {
     renderWithRouter(<App />)
 

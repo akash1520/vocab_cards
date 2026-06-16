@@ -1,10 +1,12 @@
+import { Layout } from './components/Layout/Layout'
+import { AppRouter } from './routes/AppRouter'
 import './App.css'
 
 function App() {
   return (
-    <nav aria-label="Main navigation">
-      <span>Vocab Cards</span>
-    </nav>
+    <Layout>
+      <AppRouter />
+    </Layout>
   )
 }
 

@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
 import type { Word } from '../api/types'
+import { Layout } from '../components/Layout/Layout'
 import { sampleWord } from '../test/fixtures'
 import { renderWithRouter } from '../test/renderWithRouter'
 import { server } from '../test/mswServer'
@@ -25,7 +26,11 @@ describe('StudyPage', () => {
       http.get('/api/words/due', () => HttpResponse.json([sampleWord, secondWord])),
     )
 
-    renderWithRouter(<StudyPage />)
+    renderWithRouter(
+      <Layout>
+        <StudyPage />
+      </Layout>,
+    )
 
     await waitFor(() => {
       expect(screen.getByText('unnerve')).toBeVisible()
@@ -43,7 +48,11 @@ describe('StudyPage', () => {
       http.get('/api/words/due', () => HttpResponse.json([sampleWord, secondWord])),
     )
 
-    renderWithRouter(<StudyPage />)
+    renderWithRouter(
+      <Layout>
+        <StudyPage />
+      </Layout>,
+    )
 
     await waitFor(() => {
       expect(screen.getByText('unnerve')).toBeVisible()
@@ -58,7 +67,11 @@ describe('StudyPage', () => {
   it('shows a link to add words', async () => {
     server.use(http.get('/api/words/due', () => HttpResponse.json([])))
 
-    renderWithRouter(<StudyPage />)
+    renderWithRouter(
+      <Layout>
+        <StudyPage />
+      </Layout>,
+    )
 
     await waitFor(() => {
       expect(

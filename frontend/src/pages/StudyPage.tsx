@@ -1,5 +1,4 @@
 import { useStudySession } from '../hooks/useStudySession'
-import { StudyPageHeader } from './StudyPageHeader'
 import { StudyPageStatus } from './StudyPageStatus'
 import { StudySessionView } from './StudySessionView'
 import './StudyPage.css'
@@ -22,8 +21,6 @@ export function StudyPage() {
 
   return (
     <main className="study-page">
-      <StudyPageHeader />
-
       {isLoading ? (
         <StudyPageStatus message="Loading study queue..." />
       ) : null}

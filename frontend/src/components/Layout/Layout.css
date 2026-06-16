@@ -1,0 +1,38 @@
+.layout__nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: min(100%, 480px);
+  margin: 0 auto;
+  padding: 1rem 1rem 0;
+}
+
+.layout__brand {
+  color: var(--text-h);
+  font-weight: 700;
+}
+
+.layout__links {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.layout__link {
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.layout__link:hover {
+  color: var(--text-h);
+}
+
+.layout__link[aria-current='page'] {
+  color: var(--accent);
+}
+
+.layout__link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
