@@ -63,7 +63,7 @@ Returns the updated `Word` after applying SRS rules.
 - `knew_it: true` on review → multiply interval by `ease_factor` (min `1.3`), cap at `90` days
 - Mastered when `interval_days >= 30` and `repetitions >= 4`
 
-Frontend mirrors these rules in [`../srs/srs.ts`](../srs/srs.ts) for parity testing.
+Frontend mirrors these rules in [`../srs/srs.ts`](../srs/srs.ts). Shared constants for backend parity live in [`../srs/constants.ts`](../srs/constants.ts).
 
 ## Dev setup
 

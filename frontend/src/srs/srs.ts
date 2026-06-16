@@ -1,36 +1,43 @@
 import type { Word, WordStatus } from '../api/types'
-
-const LEARNING_INTERVALS_DAYS = [1, 3, 7, 14, 30] as const
-const LEARNING_RETRY_MINUTES = 10
-const MAX_INTERVAL_DAYS = 90
-const MIN_EASE_FACTOR = 1.3
+import {
+  LEARNING_INTERVALS_DAYS,
+  LEARNING_RETRY_MINUTES,
+  MASTERED_INTERVAL_DAYS,
+  MASTERED_REPETITIONS,
+  MAX_INTERVAL_DAYS,
+  MIN_EASE_FACTOR,
+  REVIEW_REPETITIONS,
+} from './constants'
+import { addDays, addMinutes } from './dates'
 
 export type SrsUpdate = Pick<
   Word,
   'status' | 'interval_days' | 'repetitions' | 'next_review_at' | 'ease_factor'
 >
 
-function addMinutes(from: Date, minutes: number): string {
-  return new Date(from.getTime() + minutes * 60_000).toISOString()
-}
-
-function addDays(from: Date, days: number): string {
-  return new Date(from.getTime() + days * 86_400_000).toISOString()
-}
-
 function resolveStatus(
   intervalDays: number,
   repetitions: number,
 ): WordStatus {
-  if (intervalDays >= 30 && repetitions >= 4) {
+  if (intervalDays >= MASTERED_INTERVAL_DAYS && repetitions >= MASTERED_REPETITIONS) {
     return 'mastered'
   }
 
-  if (repetitions >= 3) {
+  if (repetitions >= REVIEW_REPETITIONS) {
     return 'review'
   }
 
   return 'learning'
+}
+
+function buildSrsUpdate(
+  word: Word,
+  update: Omit<SrsUpdate, 'ease_factor'>,
+): SrsUpdate {
+  return {
+    ...update,
+    ease_factor: word.ease_factor,
+  }
 }
 
 export function computeNextReview(
@@ -39,13 +46,12 @@ export function computeNextReview(
   now: Date,
 ): SrsUpdate {
   if (!knewIt) {
-    return {
+    return buildSrsUpdate(word, {
       status: 'learning',
       interval_days: 0,
       repetitions: 0,
       next_review_at: addMinutes(now, LEARNING_RETRY_MINUTES),
-      ease_factor: word.ease_factor,
-    }
+    })
   }
 
   if (word.status === 'review' || word.status === 'mastered') {
@@ -56,13 +62,12 @@ export function computeNextReview(
       MAX_INTERVAL_DAYS,
     )
 
-    return {
+    return buildSrsUpdate(word, {
       status: resolveStatus(intervalDays, repetitions),
       interval_days: intervalDays,
       repetitions,
       next_review_at: addDays(now, intervalDays),
-      ease_factor: word.ease_factor,
-    }
+    })
   }
 
   const repetitions = word.repetitions + 1
@@ -71,13 +76,12 @@ export function computeNextReview(
       Math.min(repetitions - 1, LEARNING_INTERVALS_DAYS.length - 1)
     ]
 
-  return {
+  return buildSrsUpdate(word, {
     status: resolveStatus(intervalDays, repetitions),
     interval_days: intervalDays,
     repetitions,
     next_review_at: addDays(now, intervalDays),
-    ease_factor: word.ease_factor,
-  }
+  })
 }
 
 export function isDue(word: Word, now: Date): boolean {
