@@ -1,0 +1,76 @@
+.flash-card {
+  display: block;
+  width: min(100%, 420px);
+  min-height: 280px;
+  margin: 0 auto;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--bg);
+  box-shadow: var(--shadow);
+  color: var(--text-h);
+  cursor: pointer;
+  perspective: 1000px;
+  text-align: center;
+}
+
+.flash-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.flash-card__inner {
+  min-height: 280px;
+  transform-style: preserve-3d;
+  transition: transform 0.4s ease;
+}
+
+.flash-card--flipped .flash-card__inner {
+  transform: rotateY(180deg);
+}
+
+.flash-card__face {
+  display: flex;
+  min-height: 280px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem 1.5rem;
+}
+
+.flash-card__face--back {
+  transform: rotateY(180deg);
+  text-align: left;
+}
+
+.flash-card__term {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.flash-card__hint {
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.flash-card__definition,
+.flash-card__synonyms,
+.flash-card__example {
+  margin: 0;
+  width: 100%;
+}
+
+.flash-card__part-of-speech {
+  font-weight: 700;
+  text-transform: lowercase;
+}
+
+.flash-card__synonyms {
+  color: var(--text);
+}
+
+.flash-card__example {
+  color: var(--text);
+}

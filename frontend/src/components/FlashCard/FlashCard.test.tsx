@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { FlashCard } from './FlashCard'
-import { sampleWord } from '../test/fixtures'
+import { sampleWord } from '../../test/fixtures'
 
 describe('FlashCard', () => {
   it('renders the term on the front and hides back content', () => {
