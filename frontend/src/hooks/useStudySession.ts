@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useState } from 'react'
-import { getDueWords, submitReview } from '../api/wordsApi'
 import type { Word } from '../api/types'
+import { loadDueWords } from './loadDueWords'
+import { EMPTY_STUDY_MESSAGE } from './messages'
+import { reviewWord } from './reviewWord'
+import type { StudySession } from './types'
 
-export const EMPTY_STUDY_MESSAGE =
-  'No words due — add some or check back later'
+export { EMPTY_STUDY_MESSAGE } from './messages'
+export type { StudySession } from './types'
 
-export function useStudySession() {
+export function useStudySession(): StudySession {
   const [words, setWords] = useState<Word[]>([])
   const [queueIndex, setQueueIndex] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
@@ -15,38 +18,28 @@ export function useStudySession() {
   useEffect(() => {
     let isActive = true
 
-    async function loadDueWords() {
+    async function fetchDueWords() {
       setIsLoading(true)
       setError(null)
 
-      try {
-        const dueWords = await getDueWords()
-        if (!isActive) {
-          return
-        }
+      const result = await loadDueWords()
+      if (!isActive) {
+        return
+      }
 
-        setWords(dueWords)
+      if (result.ok) {
+        setWords(result.words)
         setQueueIndex(0)
-      } catch (loadError) {
-        if (!isActive) {
-          return
-        }
-
+      } else {
         setWords([])
         setQueueIndex(0)
-        setError(
-          loadError instanceof Error
-            ? loadError.message
-            : 'Request failed with status 0',
-        )
-      } finally {
-        if (isActive) {
-          setIsLoading(false)
-        }
+        setError(result.error)
       }
+
+      setIsLoading(false)
     }
 
-    void loadDueWords()
+    void fetchDueWords()
 
     return () => {
       isActive = false
@@ -67,7 +60,7 @@ export function useStudySession() {
       return
     }
 
-    await submitReview(currentWord.id, { knew_it: true })
+    await reviewWord(currentWord, true)
     advanceQueue()
   }, [advanceQueue, currentWord])
 
@@ -76,7 +69,7 @@ export function useStudySession() {
       return
     }
 
-    await submitReview(currentWord.id, { knew_it: false })
+    await reviewWord(currentWord, false)
     advanceQueue()
   }, [advanceQueue, currentWord])
 
