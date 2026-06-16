@@ -66,6 +66,39 @@ cd frontend && npm run test:run
 cd backend && .venv/bin/pytest
 ```
 
+## Local LLM (Ollama)
+
+The **Fill with AI** button on Add Words calls `POST /api/words/enrich`, which uses [Ollama](https://ollama.com) running on your machine.
+
+### One-time Ollama setup
+
+```bash
+# Install Ollama from https://ollama.com, then pull a model:
+ollama pull llama3
+
+# Ollama usually runs automatically; if not:
+ollama serve
+```
+
+### Backend configuration
+
+Copy and edit `backend/.env` (see [backend/.env.example](backend/.env.example)):
+
+```
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_MODEL=llama3
+```
+
+Use the model name from `ollama list`. The default is `llama3`.
+
+### Using Fill with AI
+
+1. Start Ollama and ensure the backend is running (`npm run dev`)
+2. Open **Add Words**, enter a term, click **Fill with AI**
+3. Review and edit the suggested fields, then click **Add word**
+
+If Ollama is not running, the form shows: *Ollama is unreachable. Start Ollama and pull a model.*
+
 ## Configuration
 
 - **Backend:** see [backend/.env.example](backend/.env.example) for `DATABASE_URL` and Ollama settings

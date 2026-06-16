@@ -4,6 +4,23 @@
   gap: 1rem;
 }
 
+.word-form__term-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+@media (min-width: 520px) {
+  .word-form__term-row {
+    align-items: flex-end;
+    flex-direction: row;
+  }
+
+  .word-form__term-row .word-form__field {
+    flex: 1;
+  }
+}
+
 .word-form__field {
   display: flex;
   flex-direction: column;
@@ -54,6 +71,28 @@
 .word-form__submit:disabled {
   cursor: not-allowed;
   opacity: 0.6;
+}
+
+.word-form__enrich {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--text-h);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  padding: 0.65rem 1rem;
+  white-space: nowrap;
+}
+
+.word-form__enrich:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.word-form__enrich:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .word-form__submit:focus-visible {

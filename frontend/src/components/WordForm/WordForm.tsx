@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import { enrichWord } from '../../api/wordsApi'
 import type { CreateWordInput } from '../../api/types'
 import { buildCreateWordInput } from './buildCreateWordInput'
+import { mapEnrichResponseToFormValues } from './mapEnrichResponseToFormValues'
 import { WordFormField } from './WordFormField'
 import {
   emptyWordFormValues,
@@ -20,6 +22,8 @@ export function WordForm({ onSubmit, submitError = null }: WordFormProps) {
   const [values, setValues] = useState<WordFormValues>(emptyWordFormValues)
   const [fieldErrors, setFieldErrors] = useState<WordFormErrors>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isEnriching, setIsEnriching] = useState(false)
+  const [enrichError, setEnrichError] = useState<string | null>(null)
 
   function updateField<K extends keyof WordFormValues>(
     field: K,
@@ -40,6 +44,30 @@ export function WordForm({ onSubmit, submitError = null }: WordFormProps) {
   function resetForm() {
     setValues(emptyWordFormValues)
     setFieldErrors({})
+    setEnrichError(null)
+  }
+
+  async function handleEnrich() {
+    const term = values.term.trim()
+    if (!term) {
+      setFieldErrors((current) => ({ ...current, term: 'Term is required' }))
+      return
+    }
+
+    setIsEnriching(true)
+    setEnrichError(null)
+
+    try {
+      const response = await enrichWord(term)
+      setValues(mapEnrichResponseToFormValues(response))
+      setFieldErrors({})
+    } catch (error) {
+      setEnrichError(
+        error instanceof Error ? error.message : 'Failed to fill with AI',
+      )
+    } finally {
+      setIsEnriching(false)
+    }
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -63,15 +91,27 @@ export function WordForm({ onSubmit, submitError = null }: WordFormProps) {
     }
   }
 
+  const isBusy = isSubmitting || isEnriching
+
   return (
     <form className="word-form" onSubmit={(event) => void handleSubmit(event)}>
-      <WordFormField
-        id="term"
-        label="Term"
-        value={values.term}
-        error={fieldErrors.term}
-        onChange={(value) => updateField('term', value)}
-      />
+      <div className="word-form__term-row">
+        <WordFormField
+          id="term"
+          label="Term"
+          value={values.term}
+          error={fieldErrors.term}
+          onChange={(value) => updateField('term', value)}
+        />
+        <button
+          type="button"
+          className="word-form__enrich"
+          disabled={isBusy}
+          onClick={() => void handleEnrich()}
+        >
+          {isEnriching ? 'Filling…' : 'Fill with AI'}
+        </button>
+      </div>
       <WordFormField
         id="part_of_speech"
         label="Part of speech"
@@ -103,13 +143,19 @@ export function WordForm({ onSubmit, submitError = null }: WordFormProps) {
         multiline
       />
 
+      {enrichError ? (
+        <p className="word-form__error word-form__error--submit" role="alert">
+          {enrichError}
+        </p>
+      ) : null}
+
       {submitError ? (
         <p className="word-form__error word-form__error--submit" role="alert">
           {submitError}
         </p>
       ) : null}
 
-      <button type="submit" className="word-form__submit" disabled={isSubmitting}>
+      <button type="submit" className="word-form__submit" disabled={isBusy}>
         Add word
       </button>
     </form>

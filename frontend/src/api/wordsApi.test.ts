@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { createWord, getDueWords, submitReview } from './wordsApi'
+import { createWord, enrichWord, getDueWords, submitReview } from './wordsApi'
 import type { Word } from './types'
 import { sampleWord } from '../test/fixtures'
 
@@ -101,6 +101,47 @@ describe('wordsApi', () => {
         body: JSON.stringify({ knew_it: true }),
       })
       expect(updated).toEqual(reviewedWord)
+    })
+  })
+
+  describe('enrichWord', () => {
+    it('POSTs term and returns suggested card fields', async () => {
+      const enrichResponse = {
+        term: 'ephemeral',
+        part_of_speech: 'adjective',
+        definition: 'lasting a very short time',
+        synonyms: ['fleeting', 'transient'],
+        example_sentence:
+          'The ephemeral beauty of cherry blossoms draws crowds each spring.',
+      }
+
+      vi.mocked(fetch).mockResolvedValueOnce(
+        new Response(JSON.stringify(enrichResponse), { status: 200 }),
+      )
+
+      const result = await enrichWord('ephemeral')
+
+      expect(fetch).toHaveBeenCalledWith('/api/words/enrich', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ term: 'ephemeral' }),
+      })
+      expect(result).toEqual(enrichResponse)
+    })
+
+    it('throws with server message when Ollama is unreachable', async () => {
+      vi.mocked(fetch).mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            detail: 'Ollama is unreachable. Start Ollama and pull a model.',
+          }),
+          { status: 503 },
+        ),
+      )
+
+      await expect(enrichWord('ephemeral')).rejects.toThrow(
+        'Ollama is unreachable. Start Ollama and pull a model.',
+      )
     })
   })
 })

@@ -99,4 +99,65 @@ describe('AddWordsPage', () => {
       '/',
     )
   })
+
+  it('fills the form with AI suggestions and saves the word', async () => {
+    const user = userEvent.setup()
+    let createCalled = false
+
+    server.use(
+      http.post('/api/words/enrich', async ({ request }) => {
+        const body = await request.json()
+        expect(body).toEqual({ term: 'ephemeral' })
+
+        return HttpResponse.json({
+          term: 'ephemeral',
+          part_of_speech: 'adjective',
+          definition: 'lasting a very short time',
+          synonyms: ['fleeting', 'transient'],
+          example_sentence:
+            'The ephemeral beauty of cherry blossoms draws crowds each spring.',
+        })
+      }),
+      http.post('/api/words', async ({ request }) => {
+        createCalled = true
+        const body = await request.json()
+
+        expect(body).toEqual({
+          term: 'ephemeral',
+          part_of_speech: 'adjective',
+          definition: 'lasting a very short time',
+          synonyms: ['fleeting', 'transient'],
+          example_sentence:
+            'The ephemeral beauty of cherry blossoms draws crowds each spring.',
+        })
+
+        return HttpResponse.json(
+          {
+            ...sampleWord,
+            id: 'word-new',
+            ...body,
+          },
+          { status: 201 },
+        )
+      }),
+    )
+
+    renderWithRouter(<AddWordsPage />)
+
+    await user.type(screen.getByLabelText(/^term$/i), 'ephemeral')
+    await user.click(screen.getByRole('button', { name: /fill with ai/i }))
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/^definition$/i)).toHaveValue(
+        'lasting a very short time',
+      )
+    })
+
+    await user.click(screen.getByRole('button', { name: /add word/i }))
+
+    await waitFor(() => {
+      expect(createCalled).toBe(true)
+      expect(screen.getByText(/word added successfully/i)).toBeVisible()
+    })
+  })
 })

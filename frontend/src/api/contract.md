@@ -46,6 +46,34 @@ Creates a word. Backend initializes SRS fields.
 
 **Errors:** `4xx` responses should include `{ "detail": "message" }`.
 
+### `POST /api/words/enrich`
+
+Suggests card fields for a term using a local LLM (Ollama). Does not persist.
+
+**Body:**
+
+```json
+{ "term": "ephemeral" }
+```
+
+**Response:** `EnrichWordResponse` (same shape as `CreateWordInput`)
+
+```json
+{
+  "term": "ephemeral",
+  "part_of_speech": "adjective",
+  "definition": "lasting a very short time",
+  "synonyms": ["fleeting", "transient"],
+  "example_sentence": "The ephemeral beauty of cherry blossoms draws crowds each spring."
+}
+```
+
+**Errors:**
+
+- `400` — empty or invalid term
+- `502` — LLM returned unparseable JSON after retry
+- `503` — Ollama unreachable
+
 ### `POST /api/words/{id}/review`
 
 **Body:**
@@ -69,3 +97,4 @@ Frontend mirrors these rules in [`../srs/srs.ts`](../srs/srs.ts). Shared constan
 
 - Vite proxies `/api` → `http://localhost:8000`
 - Override base URL with `VITE_API_BASE_URL` if needed
+- **Fill with AI** requires Ollama at `http://localhost:11434` (configure via `OLLAMA_BASE_URL` and `OLLAMA_MODEL` in `backend/.env`)

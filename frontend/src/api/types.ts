@@ -25,3 +25,11 @@ export type CreateWordInput = {
 export type ReviewPayload = {
   knew_it: boolean
 }
+
+export type EnrichWordResponse = {
+  term: string
+  part_of_speech: string
+  definition: string
+  synonyms: string[]
+  example_sentence: string
+}
