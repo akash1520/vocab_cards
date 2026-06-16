@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
-import type { CreateWordInput } from '../../api/types'
+import type { CreateWordInput, EnrichWordResponse } from '../../api/types'
 import * as wordsApi from '../../api/wordsApi'
 import { WordForm } from './WordForm'
 
@@ -12,6 +12,14 @@ const validInput: CreateWordInput = {
   synonyms: ['fleeting', 'transient'],
   example_sentence:
     'The ephemeral beauty of cherry blossoms draws crowds each spring.',
+}
+
+const enrichResponse: EnrichWordResponse = {
+  term: validInput.term,
+  part_of_speech: validInput.part_of_speech,
+  definition: validInput.definition,
+  synonyms: validInput.synonyms ?? [],
+  example_sentence: validInput.example_sentence,
 }
 
 describe('WordForm', () => {
@@ -83,7 +91,7 @@ describe('WordForm', () => {
 
   it('prefills fields when Fill with AI succeeds', async () => {
     const user = userEvent.setup()
-    const enrichSpy = vi.spyOn(wordsApi, 'enrichWord').mockResolvedValue(validInput)
+    const enrichSpy = vi.spyOn(wordsApi, 'enrichWord').mockResolvedValue(enrichResponse)
 
     render(<WordForm onSubmit={vi.fn()} />)
 

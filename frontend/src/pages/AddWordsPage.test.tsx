@@ -2,6 +2,7 @@ import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
+import type { CreateWordInput } from '../api/types'
 import { sampleWord } from '../test/fixtures'
 import { renderWithRouter } from '../test/renderWithRouter'
 import { server } from '../test/mswServer'
@@ -120,7 +121,7 @@ describe('AddWordsPage', () => {
       }),
       http.post('/api/words', async ({ request }) => {
         createCalled = true
-        const body = await request.json()
+        const body = (await request.json()) as CreateWordInput
 
         expect(body).toEqual({
           term: 'ephemeral',
@@ -135,7 +136,11 @@ describe('AddWordsPage', () => {
           {
             ...sampleWord,
             id: 'word-new',
-            ...body,
+            term: body.term,
+            part_of_speech: body.part_of_speech,
+            definition: body.definition,
+            synonyms: body.synonyms ?? [],
+            example_sentence: body.example_sentence,
           },
           { status: 201 },
         )
