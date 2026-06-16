@@ -2,8 +2,10 @@ from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
+from app.auth.dependencies import get_current_user
 from app.repositories.dependencies import get_word_repository
 from app.repositories.word_repository import WordRepository
+from app.schemas.user import User
 from app.schemas.word import (
     CreateWordInput,
     EnrichWordRequest,
@@ -48,7 +50,10 @@ def create_word(
 
 
 @router.post("/enrich", response_model=EnrichWordResponse)
-async def enrich_word(payload: EnrichWordRequest) -> EnrichWordResponse:
+async def enrich_word(
+    payload: EnrichWordRequest,
+    _: User = Depends(get_current_user),
+) -> EnrichWordResponse:
     return await enrich_word_with_ollama(payload.term.strip())
 
 

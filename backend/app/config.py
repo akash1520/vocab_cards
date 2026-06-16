@@ -9,6 +9,11 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:5173"
     ollama_base_url: str = "http://localhost:11434"
     ollama_model: str = "llama3"
+    jwt_secret: str = "dev-only-change-me"
+    jwt_algorithm: str = "HS256"
+    jwt_expire_minutes: int = 1440
+    admin_email: str = "admin@example.com"
+    admin_password: str = "admin-change-me"
 
     @field_validator("database_url", mode="before")
     @classmethod

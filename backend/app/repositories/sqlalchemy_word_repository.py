@@ -8,22 +8,30 @@ from app.services.srs import SrsUpdate
 
 
 class SqlAlchemyWordRepository(WordRepository):
-    def __init__(self, session: Session) -> None:
+    def __init__(self, session: Session, user_id: str) -> None:
         self._session = session
+        self._user_id = user_id
 
     def list_all(self) -> list[Word]:
-        rows = self._session.scalars(select(WordRow).order_by(WordRow.created_at)).all()
+        rows = self._session.scalars(
+            select(WordRow)
+            .where(WordRow.user_id == self._user_id)
+            .order_by(WordRow.created_at),
+        ).all()
         return [Word.model_validate(row) for row in rows]
 
     def find_by_id(self, word_id: str) -> Word | None:
         row = self._session.get(WordRow, word_id)
-        if row is None:
+        if row is None or row.user_id != self._user_id:
             return None
         return Word.model_validate(row)
 
     def find_by_term_case_insensitive(self, term: str) -> Word | None:
         row = self._session.scalar(
-            select(WordRow).where(func.lower(WordRow.term) == term.lower()),
+            select(WordRow).where(
+                WordRow.user_id == self._user_id,
+                func.lower(WordRow.term) == term.lower(),
+            ),
         )
         if row is None:
             return None
@@ -31,6 +39,7 @@ class SqlAlchemyWordRepository(WordRepository):
 
     def create(self, payload: CreateWordInput) -> Word:
         row = WordRow(
+            user_id=self._user_id,
             term=payload.term.strip(),
             part_of_speech=payload.part_of_speech.strip(),
             definition=payload.definition.strip(),
@@ -49,7 +58,7 @@ class SqlAlchemyWordRepository(WordRepository):
 
     def apply_srs_update(self, word_id: str, update: SrsUpdate) -> Word | None:
         row = self._session.get(WordRow, word_id)
-        if row is None:
+        if row is None or row.user_id != self._user_id:
             return None
 
         row.status = update.status

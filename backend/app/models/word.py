@@ -1,18 +1,29 @@
 import uuid
 from datetime import datetime
+from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, Float, Integer, String, Text, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint, func
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import JSON
 
 from app.db.base import Base
 
+if TYPE_CHECKING:
+    from app.models.user import UserRow
+
 
 class WordRow(Base):
     __tablename__ = "words"
+    __table_args__ = (UniqueConstraint("user_id", "term", name="uq_words_user_id_term"),)
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    term: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
+    user_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    term: Mapped[str] = mapped_column(String(255), nullable=False)
     part_of_speech: Mapped[str] = mapped_column(String(64), nullable=False)
     definition: Mapped[str] = mapped_column(Text, nullable=False)
     synonyms: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
@@ -27,3 +38,5 @@ class WordRow(Base):
         nullable=False,
         server_default=func.now(),
     )
+
+    user: Mapped["UserRow"] = relationship(back_populates="words")
