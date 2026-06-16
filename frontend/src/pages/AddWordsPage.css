@@ -1,0 +1,33 @@
+.add-words-page {
+  width: min(100%, 480px);
+  margin: 0 auto;
+  padding: 1.5rem 1rem 2rem;
+}
+
+.add-words-page__header {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 1rem;
+}
+
+.add-words-page__link {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.add-words-page__link:hover {
+  text-decoration: underline;
+}
+
+.add-words-page__title {
+  margin: 0 0 1.25rem;
+  color: var(--text-h);
+  font-size: 1.5rem;
+}
+
+.add-words-page__success {
+  margin: 0 0 1rem;
+  color: var(--text-h);
+  text-align: center;
+}
