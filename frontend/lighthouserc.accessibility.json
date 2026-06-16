@@ -4,7 +4,8 @@
       "staticDistDir": "./dist",
       "numberOfRuns": 1,
       "settings": {
-        "onlyCategories": ["accessibility"]
+        "onlyCategories": ["accessibility"],
+        "chromeFlags": "--no-sandbox --disable-dev-shm-usage"
       }
     },
     "assert": {
