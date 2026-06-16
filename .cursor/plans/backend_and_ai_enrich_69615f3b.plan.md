@@ -4,31 +4,31 @@ overview: Scaffold a FastAPI backend in the empty `backend/` folder implementing
 todos:
   - id: backend-scaffold
     content: Scaffold FastAPI project in backend/ (pyproject.toml, config, main, SQLite setup, .env.example)
-    status: pending
+    status: completed
   - id: srs-port
     content: Port srs.ts + constants to Python with pytest cases mirroring frontend/src/srs/srs.test.ts
-    status: pending
+    status: completed
   - id: words-crud
     content: Implement Word model, schemas, and GET/POST/review/due endpoints with duplicate-term guard
-    status: pending
+    status: completed
   - id: ollama-enrich
     content: Add Ollama enrich service + POST /api/words/enrich with error handling and tests (mocked HTTP)
-    status: pending
+    status: completed
   - id: contract-update
     content: Extend frontend/src/api/contract.md with enrich endpoint and EnrichWordResponse type
-    status: pending
+    status: completed
   - id: frontend-enrich-api
     content: Add enrichWord to types.ts + wordsApi.ts + unit tests
-    status: pending
+    status: completed
   - id: word-form-ui
     content: Build WordForm with Fill with AI + manual fields + validation (TDD)
-    status: pending
+    status: completed
   - id: add-words-routing
     content: Add AddWordsPage, AppRouter, Layout nav; wire /add-words route
-    status: pending
+    status: completed
   - id: integration-qa
     content: "Manual end-to-end: Ollama enrich → save → due queue on study page"
-    status: pending
+    status: completed
 isProject: false
 ---
 
