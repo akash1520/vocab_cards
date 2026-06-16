@@ -66,8 +66,10 @@ describe('useStudySession', () => {
 
     await result.current.markKnown()
 
+    await waitFor(() => {
+      expect(result.current.currentWord).toEqual(secondWord)
+    })
     expect(reviewCalled).toBe(true)
-    expect(result.current.currentWord).toEqual(secondWord)
     expect(result.current.currentIndex).toBe(2)
   })
 
@@ -100,8 +102,10 @@ describe('useStudySession', () => {
 
     await result.current.markLearning()
 
+    await waitFor(() => {
+      expect(result.current.currentWord).toEqual(secondWord)
+    })
     expect(reviewCalled).toBe(true)
-    expect(result.current.currentWord).toEqual(secondWord)
   })
 
   it('shows an empty message when no words are due', async () => {
