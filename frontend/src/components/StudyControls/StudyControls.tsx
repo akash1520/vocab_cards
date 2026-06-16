@@ -1,3 +1,6 @@
+import { STUDY_LABELS } from './labels'
+import { StudyActionButton } from './StudyActionButton'
+import { StudyProgress } from './StudyProgress'
 import './StudyControls.css'
 
 type StudyControlsProps = {
@@ -19,26 +22,20 @@ export function StudyControls({
 
   return (
     <section className="study-controls" aria-label="Study controls">
-      <p className="study-controls__progress">
-        {currentIndex} / {total}
-      </p>
+      <StudyProgress currentIndex={currentIndex} total={total} />
       <div className="study-controls__actions">
-        <button
-          type="button"
-          className="study-controls__button study-controls__button--learning"
+        <StudyActionButton
+          label={STUDY_LABELS.stillLearning}
+          variant="learning"
           disabled={actionsDisabled}
           onClick={onLearning}
-        >
-          Still learning
-        </button>
-        <button
-          type="button"
-          className="study-controls__button study-controls__button--know"
+        />
+        <StudyActionButton
+          label={STUDY_LABELS.knowWord}
+          variant="know"
           disabled={actionsDisabled}
           onClick={onKnow}
-        >
-          I know this word
-        </button>
+        />
       </div>
     </section>
   )
