@@ -1,6 +1,74 @@
 # API contract
 
-The frontend expects a FastAPI backend implementing these endpoints. Types are defined in [`types.ts`](./types.ts).
+The frontend expects a FastAPI backend implementing these endpoints. Types are defined in [`types.ts`](./types.ts) and [`authTypes.ts`](./authTypes.ts).
+
+All word and admin routes require `Authorization: Bearer <access_token>` from login.
+
+## Auth
+
+### `User`
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `id` | `string` | Unique identifier |
+| `email` | `string` | User email |
+| `role` | `'user' \| 'admin'` | Admin is seeded from env; registration always creates `user` |
+| `created_at` | `string` | ISO datetime |
+
+### `POST /api/auth/register`
+
+Creates a new account (`role=user`).
+
+**Body:**
+
+```json
+{ "email": "user@example.com", "password": "password123" }
+```
+
+**Response:** `User` (`201`)
+
+**Errors:** `409` — email already registered
+
+### `POST /api/auth/login`
+
+OAuth2 password flow. Form fields: `username` (email) and `password`.
+
+**Response:**
+
+```json
+{ "access_token": "…", "token_type": "bearer" }
+```
+
+**Errors:** `401` — incorrect email or password
+
+### `GET /api/auth/me`
+
+Returns the authenticated `User`.
+
+**Errors:** `401` — missing or invalid token
+
+## Admin
+
+### `GET /api/admin/users`
+
+Admin only. Returns aggregate per-user stats (no per-word drill-down).
+
+**Response:** `AdminUserSummary[]`
+
+```json
+[
+  {
+    "id": "…",
+    "email": "user@example.com",
+    "role": "user",
+    "created_at": "2026-01-01T00:00:00.000Z",
+    "word_count": 12,
+    "due_count": 3
+  }
+]
+```
+
+**Errors:** `401` — not authenticated; `403` — not admin
 
 ## `Word`
 
@@ -22,11 +90,11 @@ The frontend expects a FastAPI backend implementing these endpoints. Types are d
 
 ### `GET /api/words`
 
-Returns all words.
+Returns all words for the authenticated user.
 
 ### `GET /api/words/due?limit=20`
 
-Returns words where `next_review_at` is `null` or `<= now`, ordered by urgency.
+Returns words where `next_review_at` is `null` or `<= now`, ordered by urgency, for the authenticated user.
 
 ### `POST /api/words`
 

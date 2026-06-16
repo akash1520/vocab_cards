@@ -76,7 +76,7 @@ python -m venv .venv
 DATABASE_URL="postgresql://YOUR_NEON_CONNECTION_STRING" .venv/bin/alembic upgrade head
 ```
 
-You should see Alembic apply revision `001` (initial `words` table).
+You should see Alembic apply revisions `001` and `002` (`words` table, then `users` and per-user word ownership).
 
 ---
 
@@ -103,13 +103,16 @@ Render prompts for variables marked `sync: false` in the blueprint:
 |-----|-------|-------|
 | `DATABASE_URL` | Your Neon connection string | Full `postgresql://...` URI from Step 1 |
 | `CORS_ORIGINS` | `https://placeholder.vercel.app` | Temporary — update after Step 3 |
+| `JWT_SECRET` | Long random string | Required in production; do not use the dev default |
+| `ADMIN_EMAIL` | Admin login email | Seeded on first start if no admin exists |
+| `ADMIN_PASSWORD` | Strong admin password | Used only for the initial seeded admin account |
 
 Use a placeholder for `CORS_ORIGINS` for now. You will set the real Vercel URL in Step 4.
 
 #### 2A.3 Wait for deploy
 
 1. Render builds the Docker image from [`backend/Dockerfile`](backend/Dockerfile).
-2. On start, [`backend/scripts/start.sh`](backend/scripts/start.sh) runs `alembic upgrade head`, then uvicorn.
+2. On start, [`backend/scripts/start.sh`](backend/scripts/start.sh) runs `alembic upgrade head`, seeds the admin account (if needed), then uvicorn.
 3. When status is **Live**, copy your service URL (e.g. `https://vocab-cards-api.onrender.com`).
 
 #### 2A.4 Verify the API
@@ -128,7 +131,9 @@ Expected:
 curl https://YOUR-RENDER-URL.onrender.com/api/words
 ```
 
-Expected: `[]` or a JSON array of words.
+Expected without auth: `401 Unauthorized`.
+
+Sign in via the frontend (**Register** or the seeded admin from `ADMIN_EMAIL` / `ADMIN_PASSWORD`), then word routes work with the JWT returned from `POST /api/auth/login`.
 
 ---
 
@@ -152,6 +157,9 @@ Use this if you prefer not to use the Blueprint.
    |-----|-------|
    | `DATABASE_URL` | Neon connection string |
    | `CORS_ORIGINS` | `https://placeholder.vercel.app` |
+   | `JWT_SECRET` | Long random string |
+   | `ADMIN_EMAIL` | Admin login email |
+   | `ADMIN_PASSWORD` | Strong admin password |
 
 4. **Health check path:** `/health`
 5. Click **Create Web Service** and wait until **Live**.

@@ -1,6 +1,6 @@
 # Vocab Cards
 
-A vocabulary flashcard app with spaced repetition. React frontend + FastAPI backend.
+A vocabulary flashcard app with spaced repetition. React frontend + FastAPI backend with JWT auth and per-user word lists.
 
 ## Prerequisites
 
@@ -67,9 +67,10 @@ npm run dev:backend    # FastAPI only
 ## Verify
 
 1. Open http://localhost:5173
-2. Go to **Add Words**, submit a word — you should see a success message
-3. Go to **Study** — the due queue loads (or shows an empty-state message, not a connection error)
-4. Quick API check: `curl http://localhost:8000/api/words`
+2. **Register** a new account (or sign in as the seeded admin from `backend/.env`: `ADMIN_EMAIL` / `ADMIN_PASSWORD`)
+3. Go to **Add Words**, submit a word — you should see a success message
+4. Go to **Study** — the due queue loads (or shows an empty-state message, not a connection error)
+5. Unauthenticated API check: `curl http://localhost:8000/api/words` should return `401`
 
 ## Tests
 
@@ -116,7 +117,7 @@ If Ollama is not running, the form shows: *Ollama is unreachable. Start Ollama a
 
 ## Configuration
 
-- **Backend:** see [backend/.env.example](backend/.env.example) for `DATABASE_URL`, `CORS_ORIGINS`, and Ollama settings
+- **Backend:** see [backend/.env.example](backend/.env.example) for `DATABASE_URL`, `CORS_ORIGINS`, JWT settings, admin seed credentials, and Ollama settings
 - **Frontend:** see [frontend/.env.example](frontend/.env.example) for optional `VITE_API_BASE_URL` (not needed when using the Vite proxy)
 
 ## Production deploy
