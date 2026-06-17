@@ -16,7 +16,7 @@ describe('wordsApi', () => {
   })
 
   describe('getDueWords', () => {
-    it('calls GET /api/words/due?limit=20 and returns typed words', async () => {
+    it('calls GET /api/words/due?limit=10 and returns typed words', async () => {
       setToken('test-token')
 
       vi.mocked(fetch).mockResolvedValueOnce(
@@ -26,7 +26,7 @@ describe('wordsApi', () => {
       const words = await getDueWords()
 
       expect(fetch).toHaveBeenCalledWith(
-        '/api/words/due?limit=20',
+        '/api/words/due?limit=10',
         expect.objectContaining({
           headers: expect.any(Headers),
         }),

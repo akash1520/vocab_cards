@@ -8,8 +8,6 @@ import type { StudySession } from './types'
 export { EMPTY_STUDY_MESSAGE } from './messages'
 export type { StudySession } from './types'
 
-const REQUEUE_STACK_THRESHOLD = 10
-
 export function useStudySession(): StudySession {
   const [words, setWords] = useState<Word[]>([])
   const [queueIndex, setQueueIndex] = useState(0)
@@ -82,13 +80,8 @@ export function useStudySession(): StudySession {
     }
 
     await reviewWord(currentWord, false)
-
-    if (words.length < REQUEUE_STACK_THRESHOLD) {
-      rotateCurrentToBack()
-    } else {
-      removeCurrentFromQueue()
-    }
-  }, [currentWord, removeCurrentFromQueue, rotateCurrentToBack, words.length])
+    rotateCurrentToBack()
+  }, [currentWord, rotateCurrentToBack])
 
   return {
     currentWord,

@@ -149,7 +149,7 @@ describe('useStudySession', () => {
     })
   })
 
-  it('markLearning re-queues the card at the end when the stack has fewer than 10 cards', async () => {
+  it('markLearning re-queues the card at the end of the queue', async () => {
     server.use(
       http.get('/api/words/due', () => HttpResponse.json([sampleWord])),
       http.post('/api/words/word-1/review', () =>
@@ -178,7 +178,7 @@ describe('useStudySession', () => {
     })
   })
 
-  it('markLearning does not re-queue when the stack already has 10 cards', async () => {
+  it('markLearning re-queues the card at the end even when the stack is large', async () => {
     const tenWords = Array.from({ length: 10 }, (_, index) => ({
       ...sampleWord,
       id: `word-${index + 1}`,
@@ -208,7 +208,7 @@ describe('useStudySession', () => {
 
     await waitFor(() => {
       expect(result.current.currentWord).toEqual(tenWords[1])
-      expect(result.current.total).toBe(9)
+      expect(result.current.total).toBe(10)
     })
   })
 

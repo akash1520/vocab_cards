@@ -6,7 +6,7 @@ import type {
 } from './types'
 import { apiGet, apiPost } from './http'
 
-export async function getDueWords(limit = 20): Promise<Word[]> {
+export async function getDueWords(limit = 10): Promise<Word[]> {
   return apiGet<Word[]>(`/api/words/due?limit=${limit}`)
 }
 
