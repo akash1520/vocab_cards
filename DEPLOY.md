@@ -211,6 +211,10 @@ Ollama has no cloud host in this setup. To make **Fill with AI** work in product
 - `OLLAMA_BASE_URL` on Render must match the current tunnel URL — it changes on every tunnel restart.
 - `OLLAMA_MODEL` on Render must be a model that `ollama list` shows locally.
 
+**Tunnel returns 403 Forbidden**
+
+- Ollama rejects requests whose `Host` header isn't `localhost` (DNS-rebinding protection), and the tunnel forwards the `trycloudflare.com` host by default. The `ollama:tunnel` script fixes this with `--http-host-header localhost:11434`. If you start `cloudflared` by hand, include that flag.
+
 ---
 
 ## Checklist

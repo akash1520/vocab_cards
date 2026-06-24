@@ -7,9 +7,10 @@
     "dev:backend": "cd backend && .venv/bin/uvicorn app.main:app --reload --port 8000",
     "dev:db": "docker compose up -d postgres",
     "db:migrate": "cd backend && .venv/bin/alembic upgrade head",
-    "ollama:tunnel": "cloudflared tunnel --url http://localhost:11434"
+    "ollama:tunnel": "cloudflared tunnel --url http://localhost:11434 --http-host-header localhost:11434"
   },
   "devDependencies": {
-    "concurrently": "^9.1.2"
+    "concurrently": "^9.1.2",
+    "localtunnel": "^2.0.2"
   }
 }
