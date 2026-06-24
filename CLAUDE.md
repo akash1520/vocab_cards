@@ -35,8 +35,12 @@ cd backend && .venv/bin/pytest tests/test_words_api.py  # single file
 ### Build & lint
 
 ```bash
-cd frontend && npm run build   # tsc + vite build
+cd frontend && npm run build   # tsc -b + vite build
 cd frontend && npm run lint    # eslint
+
+# Lighthouse audits (require a Chrome binary; also run in CI)
+cd frontend && npm run lighthouse:accessibility
+cd frontend && npm run lighthouse:performance
 ```
 
 ### First-time setup
@@ -76,6 +80,8 @@ FastAPI app (`app/main.py`) with three routers:
 
 React 19 + React Router 7 + TypeScript. Vite dev server.
 
+**React Compiler is enabled** (`babel-plugin-react-compiler` via `vite.config.ts`). Don't add manual `useMemo`/`useCallback`/`React.memo` — the compiler handles memoization. In return, the Rules of Hooks must be followed strictly or the compiler will bail out.
+
 **Auth context:** `auth/AuthProvider.tsx` manages the current user and JWT token (stored via `auth/tokenStorage.ts`). It registers a global unauthorized handler so any 401 response from `api/http.ts` clears the session automatically.
 
 **Routing + guards:** `routes/AppRouter.tsx` defines all routes. `routes/guards.tsx` provides `RequireAuth`, `RequireAdmin`, and `PublicOnly` wrapper components that read from `AuthContext`.
@@ -91,3 +97,7 @@ React 19 + React Router 7 + TypeScript. Vite dev server.
 ### Deployment
 
 Production target: Neon (Postgres) + Render (API) + Vercel (frontend). See `DEPLOY.md` and `render.yaml`. Ollama AI enrichment is local-only and does not work in production.
+
+### CI
+
+`.github/workflows/frontend-ci.yml` runs on PRs touching `frontend/**`: Vitest unit tests plus Lighthouse accessibility and performance audits (the build must pass for the audits to run). There is no backend CI — run `pytest` locally before pushing backend changes.
