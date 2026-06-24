@@ -12,7 +12,7 @@ Deploy Vocab Cards for free using three services — no credit card required for
 
 **Prerequisites:** code on GitHub, local `npm run dev` working.
 
-**Production note:** Fill with AI (Ollama) is local-only and will not work in production.
+**Production note:** Fill with AI (Ollama) has no cloud host. It works in production only while your local Ollama is exposed via a tunnel — see [Step 6 — AI enrichment (optional)](#6--ai-enrichment-ollama-optional). Without it, enrichment returns `503` and the rest of the app is unaffected.
 
 ---
 
@@ -132,6 +132,43 @@ CORS_ORIGINS=https://vocab-cards.vercel.app,https://vocab-cards-git-main-you.ver
 
 ---
 
+## 6 — AI enrichment (Ollama, optional)
+
+Ollama has no cloud host in this setup. To make **Fill with AI** work in production, expose your *local* Ollama to the Render backend through a free [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/). No application code changes are needed — the backend reads `OLLAMA_BASE_URL` from the environment.
+
+**Your machine must be awake** with Ollama and the tunnel both running for enrichment to work. When they're not, enrichment returns `503` and nothing else breaks.
+
+1. Install the tunnel client (one time):
+  ```bash
+   brew install cloudflared
+  ```
+2. Make sure Ollama is running and has the model from `OLLAMA_MODEL` (default `llama3`):
+  ```bash
+   ollama serve        # if not already running
+   ollama pull llama3  # if not already pulled
+  ```
+3. Start the tunnel (leave it running). A `package.json` script wraps this:
+  ```bash
+   npm run ollama:tunnel
+  ```
+  It prints a public HTTPS URL like `https://random-words-1234.trycloudflare.com`. Copy it.
+4. Render dashboard → `vocab-cards-api` → **Environment**, set:
+
+  | Key               | Value                                              |
+  | ----------------- | -------------------------------------------------- |
+  | `OLLAMA_BASE_URL` | The `https://...trycloudflare.com` URL from step 3 |
+  | `OLLAMA_MODEL`    | `llama3` (or whatever `ollama list` shows)         |
+
+  **Save Changes** — Render redeploys automatically.
+5. In the app, use **Fill with AI** on the Add Words page to confirm enrichment works.
+
+**Caveats:**
+
+- The quick-tunnel URL **changes every time you restart** `npm run ollama:tunnel`. Re-update `OLLAMA_BASE_URL` on Render when it does. For a stable URL, set up a [named tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/get-started/create-remote-tunnel/) with a free Cloudflare account.
+- The tunnel makes your local Ollama publicly reachable (Ollama has no built-in auth). For anything long-lived, put [Cloudflare Access](https://developers.cloudflare.com/cloudflare-one/policies/access/) in front of it.
+
+---
+
 ## Redeploying
 
 
@@ -142,6 +179,7 @@ CORS_ORIGINS=https://vocab-cards.vercel.app,https://vocab-cards-git-main-you.ver
 | New DB migration | Add Alembic revision locally, push — Render runs `alembic upgrade head` on start |
 | New Vercel URL   | Update `CORS_ORIGINS` on Render                                                  |
 | New Render URL   | Update `VITE_API_BASE_URL` on Vercel, redeploy                                   |
+| New tunnel URL   | Update `OLLAMA_BASE_URL` on Render (see Step 6)                                  |
 
 
 ---
@@ -167,6 +205,12 @@ CORS_ORIGINS=https://vocab-cards.vercel.app,https://vocab-cards-git-main-you.ver
 
 - `frontend/vercel.json` must be present in the `frontend` directory Vercel builds from.
 
+**Fill with AI returns 503 / "Ollama is unreachable"**
+
+- Your machine must be awake with `ollama serve` running and `npm run ollama:tunnel` active.
+- `OLLAMA_BASE_URL` on Render must match the current tunnel URL — it changes on every tunnel restart.
+- `OLLAMA_MODEL` on Render must be a model that `ollama list` shows locally.
+
 ---
 
 ## Checklist
@@ -177,3 +221,4 @@ CORS_ORIGINS=https://vocab-cards.vercel.app,https://vocab-cards-git-main-you.ver
 - [ ] Vercel deployed with `VITE_API_BASE_URL` set
 - [ ] `CORS_ORIGINS` on Render updated to Vercel URL
 - [ ] Register, add a word, study — all work in the browser
+- [ ] (Optional) Ollama tunnel running + `OLLAMA_BASE_URL`/`OLLAMA_MODEL` set on Render — Fill with AI works
